@@ -1,0 +1,77 @@
+{
+  "hello": "Cześć",
+  "login": "Nazwa użytkownika",
+  "common": {
+    "cancel": "Anuluj",
+    "ok": "OK",
+    "select": "Wybierz"
+  },
+  "screen": {
+    "login": {
+      "login_tab": "Logowanie",
+      "register_tab": "Rejestracja",
+      "login": "Login",
+      "password": "Hasło",
+      "email": "E-mail",
+      "login_button": "Zaloguj się",
+      "register_button": "Zarejestruj się"
+    },
+    "pets": {
+      "header": "Moje zwierzaki"
+    },
+    "pet": {
+      "list": "Lista",
+      "save": "Zapisz",
+      "profile": "Profil",
+      "schedule": "Zadania",
+      "gender": "Płeć",
+      "birth_year": "Rok urodzenia",
+      "new_task": "Nowe zadanie...",
+      "remove_profile_button": "Usuń profil",
+      "confirm_remove": "Czy na pewno chcesz usunąć profil zwierzaka?",
+      "saved": "Profil został zapisany"
+    },
+    "new_pet": {
+      "header": "Nowy profil",
+      "cancel": "Anuluj",
+      "add": "Dodaj",
+      "name": "Imię",
+      "type": "Gatunek"
+    },
+    "task": {
+      "header": "Nowe zadanie",
+      "cancel": "Anuluj",
+      "add": "Dodaj",
+      "name": "Nazwa",
+      "hour": "Godzina",
+      "days": "Dni tygodnia"
+    },
+    "schedule": {
+      "header": "Zadania"
+    }
+  },
+  "navigation": {
+    "tabs": {
+      "pets": "Zwierzaki",
+      "schedule": "Zadania",
+      "calendar": "Kalendarz"
+    }
+  },
+  "pet_types": {
+    "dog": "Pies",
+    "cat": "Kot"
+  },
+  "genders": {
+    "male": "Samiec",
+    "female": "Samica"
+  },
+  "days" :{
+    "MO": {"shortcut": "pn", "name": "Poniedziałek"},
+    "TU": {"shortcut": "wt", "name": "Wtorek"},
+    "WE": {"shortcut": "śr", "name": "Środa"},
+    "TH": {"shortcut": "cz", "name": "Czwartek"},
+    "FR": {"shortcut": "pt", "name": "Piątek"},
+    "SA": {"shortcut": "so", "name": "Sobota"},
+    "SU": {"shortcut": "nd", "name": "Niedziela"},
+  }
+}
