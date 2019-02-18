@@ -39,9 +39,11 @@
       "type": "Gatunek"
     },
     "task": {
-      "header": "Nowe zadanie",
+      "new_task": "Nowe zadanie",
+      "edit_task": "Edytuj zadanie",
       "cancel": "Anuluj",
       "add": "Dodaj",
+      "save": "Zapisz",
       "name": "Nazwa",
       "hour": "Godzina",
       "days": "Dni tygodnia"

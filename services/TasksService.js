@@ -2,6 +2,19 @@ import api from "./api";
 
 export class TasksService {
 
+    async getById(id, success, error) {
+        error = error || api.errorHandler;
+
+        api
+            .call()
+            .url('/api/tasks/' + id)
+            .get()
+            .json((data) => {
+                success(data);
+            })
+            .catch(error);
+    }
+
     async getAll(success, error) {
         error = error || api.errorHandler;
 
@@ -25,6 +38,20 @@ export class TasksService {
             .catch(error);
     }
 
+    async put(id, data, success, error) {
+        error = error || api.errorHandler;
+
+        api
+            .call()
+            .url('/api/tasks/' + id)
+            .json(data)
+            .put()
+            .json((data) => {
+                success(data);
+            })
+            .catch(error);
+    }
+
     async post(data, success, error) {
         error = error || api.errorHandler;
 
@@ -33,7 +60,7 @@ export class TasksService {
             .url('/api/tasks')
             .json(data)
             .post()
-            .res((data) => {
+            .json((data) => {
                 success(data);
             })
             .catch(error);
