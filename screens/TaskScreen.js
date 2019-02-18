@@ -6,29 +6,41 @@ import DateTimePicker from 'react-native-modal-datetime-picker';
 import {TasksService} from "../services/TasksService";
 import days from "../constants/Days";
 import {t} from "../services/trans";
+import {Loading} from "../components/Loading";
+import moment from "moment";
 
-export default class NewTaskScreen extends React.Component {
+export default class TaskScreen extends React.Component {
     static navigationOptions = ({navigation}) => {
         return {
-            title: t('screen.task.header'),
+            title: navigation.getParam('taskId') ? t('screen.task.edit_task') : t('screen.task.new_task'),
             headerLeft: <Button transparent onPress={navigation.getParam('backHandler')}>
                 <Text>{t('screen.task.cancel')}</Text>
             </Button>,
             headerRight: <Button transparent onPress={navigation.getParam('addHandler')}>
-                <Text>{t('screen.task.add')}</Text>
+                <Text>{navigation.getParam('taskId') ? t('screen.task.save') : t('screen.task.add')}</Text>
             </Button>,
         }
     };
 
     constructor(props) {
         super(props);
+
         this.state = {
-            name: this.props.navigation.getParam('name'),
-            hour: null,
-            hourDate: null,
-            days: days.map((day, idx) => day.code),
             isDateTimePickerVisible: false,
         };
+
+        if (this.props.navigation.getParam('taskId')) {
+            this.state.task = null;
+            this.state.isLoading = true;
+        } else {
+            this.state.task = {
+                name: this.props.navigation.getParam('name'),
+                hour: null,
+                hourDate: new Date(),
+                days: days.map((day, idx) => day.code),
+            };
+            this.state.isLoading = false;
+        }
 
         this.tasksService = new TasksService();
     }
@@ -44,9 +56,31 @@ export default class NewTaskScreen extends React.Component {
                 this._handleSaveButtonPress();
             }
         });
+
+        this.fetchData();
+    }
+
+    fetchData() {
+        if (this.props.navigation.getParam('taskId')) {
+            this.tasksService.getById(this.props.navigation.getParam('taskId'), (data) => {
+                const rrule = RRule.parseString(data.recurrence);
+
+                data.days = rrule.byweekday.map((day, idx) => {
+                    return day.toString();
+                });
+                data.hourDate = moment(data.hour, "HH:mm:ss").toDate();
+                data.hour = this._timeformat(data.hourDate);
+
+                this.setState({task: data, isLoading: false});
+            });
+        }
     }
 
     render() {
+        if (this.state.isLoading) {
+            return <Loading/>
+        }
+
         return (
             <Container style={styles.contentContainer}>
                 <ScrollView>
@@ -56,8 +90,8 @@ export default class NewTaskScreen extends React.Component {
                         <ListItem noIndent icon>
                             <Body>
                             <Input placeholder={t('screen.task.name')}
-                                   defaultValue={this.state.name}
-                                   onChangeText={(val) => this.state.name = val}/>
+                                   defaultValue={this.state.task.name}
+                                   onChangeText={(val) => this.state.task.name = val}/>
 
                             </Body>
                         </ListItem>
@@ -66,7 +100,7 @@ export default class NewTaskScreen extends React.Component {
                             <Text>{t('screen.task.hour')}</Text>
                             </Body>
                             <Right>
-                                <Text note>{this.state.hour}</Text>
+                                <Text note>{this.state.task.hour}</Text>
                                 <Icon active name="arrow-forward"/>
                             </Right>
                         </ListItem>
@@ -80,7 +114,7 @@ export default class NewTaskScreen extends React.Component {
                                 <Body style={{paddingLeft: 0, marginLeft: 0}}>
                                 <Text>{t('days.' + day.code + '.name')}</Text>
                                 </Body>
-                                <Switch value={this.state.days.includes(day.code)} onValueChange={(val) => {
+                                <Switch value={this.state.task.days.includes(day.code)} onValueChange={(val) => {
                                     this._handleDayChange(val, day.code)
                                 }}/>
                             </ListItem>;
@@ -91,6 +125,7 @@ export default class NewTaskScreen extends React.Component {
                         isVisible={this.state.isDateTimePickerVisible}
                         onConfirm={this._handleDatePicked}
                         onCancel={this._hideDateTimePicker}
+                        date={this.state.task.hourDate}
                         mode={"time"}
                     />
                 </ScrollView>
@@ -103,19 +138,16 @@ export default class NewTaskScreen extends React.Component {
     _hideDateTimePicker = () => this.setState({isDateTimePickerVisible: false});
 
     _handleDatePicked = (date) => {
-        this.setState({hour: this._timeformat(date), hourDate: date});
+        this.setState({task: {...this.state.task, hour: this._timeformat(date), hourDate: date}});
         this._hideDateTimePicker();
     };
 
     _timeformat = (date) => {
-        var h = date.getHours();
-        var m = date.getMinutes();
-        m = m < 10 ? '0' + m : m;
-        return h + ':' + m;
+        return moment(date).format('HH:mm');
     };
 
     _handleDayChange = async (val, id) => {
-        let days = this.state.days;
+        let days = this.state.task.days;
 
         if (val) {
             days.push(id);
@@ -123,32 +155,47 @@ export default class NewTaskScreen extends React.Component {
         } else {
             days = days.filter(el => el !== id);
         }
+        console.log(days);
 
-        this.setState({days: days});
+        this.setState({task: {...this.state.task, days: days}});
     };
 
     _handleSaveButtonPress = async () => {
         const rule = new RRule({
             freq: RRule.DAILY,
-            byweekday: this.state.days.map((val) => {
+            byweekday: this.state.task.days.map((val) => {
                 return RRule[val]
             }),
         });
 
-        this.tasksService.post({
-            pet_id: this.props.navigation.getParam('petId'),
-            name: this.state.name,
-            hour: this.state.hour + ':00',
+        const data = {
+            name: this.state.task.name,
+            hour: this.state.task.hour + ':00',
             time_zone: "Europe\/Warsaw",
             recurrence: rule.toString().replace('RRULE:', ''),
-        }, (data) => {
+        };
+
+        const onSuccess = (data) => {
             const reloadLastScreen = this.props.navigation.getParam('onBack');
             reloadLastScreen();
 
+            console.log(data);
+            console.log(this.props.navigation.getParam('petId'));
             this.props.navigation.navigate('Pet', {
                 id: this.props.navigation.getParam('petId')
             });
-        });
+        };
+
+        if (this.state.task.id) {
+            this.tasksService.put(this.state.task.id, data, onSuccess);
+
+        } else {
+            this.tasksService.post({
+                ...data,
+                pet_id: this.props.navigation.getParam('petId')
+            }, onSuccess);
+        }
+
     };
 }
 

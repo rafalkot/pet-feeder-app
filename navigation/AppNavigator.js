@@ -7,13 +7,13 @@ import PetsScreen from "../screens/PetsScreen";
 import PetScreen from "../screens/PetScreen";
 import {Icon} from "native-base";
 import ScheduleScreen from "../screens/ScheduleScreen";
-import NewTaskScreen from "../screens/NewTaskScreen";
+import TaskScreen from "../screens/TaskScreen";
 import {t} from "../services/trans";
 
 const PetTab = createStackNavigator({
     Pets: {screen: PetsScreen},
     NewPet: {screen: NewPetScreen},
-    NewTask: {screen: NewTaskScreen},
+    Task: {screen: TaskScreen},
     Pet: {screen: PetScreen},
 });
 

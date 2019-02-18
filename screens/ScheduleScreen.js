@@ -64,7 +64,7 @@ export default class ScheduleScreen extends React.Component {
                             <Text style={{paddingLeft: 10}}>{task.name}</Text>
                         </Body>
                         <Right>
-                            <Text note>{date.format('hh:mm')}</Text>
+                            <Text note>{date.format('HH:mm')}</Text>
                         </Right>
                     </ListItem>
                 );

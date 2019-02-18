@@ -22,6 +22,8 @@ import {PetsService} from './../services/PetsService';
 import {Loading} from "../components/Loading";
 import {t} from "../services/trans";
 import genders from '../constants/Genders';
+import RRule from "rrule/dist/esm/src/rrule";
+import moment from "moment";
 
 export default class PetScreen extends React.Component {
     static navigationOptions = ({navigation}) => {
@@ -64,6 +66,8 @@ export default class PetScreen extends React.Component {
     }
 
     fetchData() {
+        this.setState({isLoading: true});
+
         this.petsService.getById(this.props.navigation.getParam('id'), (data) => {
             this.setState({pet: data});
             this.props.navigation.setParams({header: data.name});
@@ -120,7 +124,8 @@ export default class PetScreen extends React.Component {
                                     onValueChange={(val) => this._updatePetGender(pet, val)}
                                 >
                                     {Object.keys(genders).map((key, idx) => {
-                                        return <Picker.Item key={idx} label={t('genders.' + genders[key])} value={key}/>;
+                                        return <Picker.Item key={idx} label={t('genders.' + genders[key])}
+                                                            value={key}/>;
                                     })}
                                 </Picker>
                             </Right>
@@ -170,14 +175,39 @@ export default class PetScreen extends React.Component {
                             </Right>
                         </ListItem>
                         {tasks.map((task, idx) => {
-                            return <ListItem noIndent button last={idx === tasks.length - 1} key={idx} onPress={() => {
-                                alert('press');
+                            const rrule = RRule.parseString(task.recurrence);
+                            const hour = moment(task.hour, "HH:mm:ss").format("HH:mm");
+
+                            let days = rrule.byweekday
+                                .sort((dayA, dayB) => {
+                                    return dayA.weekday - dayB.weekday;
+                                })
+                                .map((day, idx) => {
+                                    return day.toString();
+                                });
+
+                            if (days.length === 7) {
+                                days = 'codziennie';
+                            } else if (JSON.stringify(days) === JSON.stringify(['MO', 'TU', 'WE', 'TH', 'FR'])) {
+                                days = 'pn - pt';
+                            } else if (JSON.stringify(days) === JSON.stringify(['SA', 'SU'])) {
+                                days = 'weekendy';
+                            } else {
+                                days = days.map((day, idx) => {
+                                    return t('days.' + day + '.shortcut');
+                                }).join(', ');
                             }
-                            }>
+
+                            return <ListItem noIndent button icon last={idx === tasks.length - 1} key={idx}
+                                             onPress={() => this._handleTaskListItemPress(task)}>
                                 <Body>
                                 <Text>{task.name}</Text>
+                                <Text note style={{fontSize: 12}}>
+                                    {days}
+                                </Text>
                                 </Body>
                                 <Right>
+                                    <Text note>{hour}</Text>
                                     <Icon active name="arrow-forward"/>
                                 </Right>
                             </ListItem>
@@ -238,9 +268,19 @@ export default class PetScreen extends React.Component {
 
         this.setState({newTaskName: ''});
 
-        this.props.navigation.navigate('NewTask', {
+        this.props.navigation.navigate('Task', {
             petId: pet.id,
             name: name,
+            onBack: () => {
+                this.fetchData()
+            }
+        });
+    };
+
+    _handleTaskListItemPress = async (task) => {
+        this.props.navigation.navigate('Task', {
+            petId: task.pet.id,
+            taskId: task.id,
             onBack: () => {
                 this.fetchData()
             }
