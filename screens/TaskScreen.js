@@ -65,8 +65,10 @@ export default class TaskScreen extends React.Component {
             this.tasksService.getById(this.props.navigation.getParam('taskId'), (data) => {
                 const rrule = RRule.parseString(data.recurrence);
 
-                data.days = rrule.byweekday.map((day, idx) => {
+                data.days = rrule.byweekday ? rrule.byweekday.map((day, idx) => {
                     return day.toString();
+                }) : days.map((day) => {
+                    return day.code;
                 });
                 data.hourDate = moment(data.hour, "HH:mm:ss").toDate();
                 data.hour = this._timeformat(data.hourDate);
