@@ -1,5 +1,5 @@
 import React from 'react';
-import {ScrollView, StyleSheet} from 'react-native';
+import {Alert, ScrollView, StyleSheet} from 'react-native';
 import {Days, RRule} from 'rrule'
 import {Body, Button, Container, Icon, Input, List, ListItem, Right, Separator, Switch, Text} from 'native-base';
 import DateTimePicker from 'react-native-modal-datetime-picker';
@@ -48,9 +48,7 @@ export default class TaskScreen extends React.Component {
     componentDidMount() {
         this.props.navigation.setParams({
             backHandler: () => {
-                this.props.navigation.navigate('Pet', {
-                    id: this.props.navigation.getParam('petId')
-                });
+                this._backToList();
             },
             addHandler: () => {
                 this._handleSaveButtonPress();
@@ -121,7 +119,9 @@ export default class TaskScreen extends React.Component {
                                 }}/>
                             </ListItem>;
                         })}
+                        <Separator bordered>
 
+                        </Separator>
                     </List>
                     <DateTimePicker
                         isVisible={this.state.isDateTimePickerVisible}
@@ -130,6 +130,12 @@ export default class TaskScreen extends React.Component {
                         date={this.state.task.hourDate}
                         mode={"time"}
                     />
+
+                    {this.state.task.id &&
+                    <Button style={{borderRadius: 0, backgroundColor: '#FFF'}} block bordered danger
+                            onPress={(e) => this._handleRemoveButtonPress(this.state.task)}>
+                        <Text>{t('screen.task.remove_task')}</Text>
+                    </Button>}
                 </ScrollView>
             </Container>
         );
@@ -178,14 +184,7 @@ export default class TaskScreen extends React.Component {
         };
 
         const onSuccess = (data) => {
-            const reloadLastScreen = this.props.navigation.getParam('onBack');
-            reloadLastScreen();
-
-            console.log(data);
-            console.log(this.props.navigation.getParam('petId'));
-            this.props.navigation.navigate('Pet', {
-                id: this.props.navigation.getParam('petId')
-            });
+            this._backToList();
         };
 
         if (this.state.task.id) {
@@ -198,6 +197,36 @@ export default class TaskScreen extends React.Component {
             }, onSuccess);
         }
 
+    };
+
+    _backToList() {
+        const reloadLastScreen = this.props.navigation.getParam('onBack');
+        reloadLastScreen();
+
+        this.props.navigation.navigate('Pet', {
+            id: this.props.navigation.getParam('petId')
+        });
+    }
+
+    _handleRemoveButtonPress = async () => {
+        Alert.alert(
+            t('screen.task.confirm_remove'),
+            '',
+            [
+                {text: t('common.cancel')},
+                {
+                    text: t('common.ok'),
+                    onPress: () => {
+                        this.tasksService.delete(this.state.task.id, (data) => {
+                            this._backToList();
+                        });
+                    },
+                    style: 'cancel',
+                },
+
+            ],
+            {cancelable: true},
+        );
     };
 }
 

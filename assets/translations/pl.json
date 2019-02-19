@@ -33,7 +33,6 @@
       "recurrence_daily": "codziennie",
       "recurrence_mo_fr": "pn - pt",
       "recurrence_weekend": "weekendy"
-
     },
     "new_pet": {
       "header": "Nowy profil",
@@ -50,7 +49,9 @@
       "save": "Zapisz",
       "name": "Nazwa",
       "hour": "Godzina",
-      "days": "Dni tygodnia"
+      "days": "Dni tygodnia",
+      "remove_task": "Usuń zadanie",
+      "confirm_remove": "Czy na pewno chcesz usunąć zadanie?"
     },
     "schedule": {
       "header": "Zadania"
