@@ -24,6 +24,7 @@ import {t} from "../services/trans";
 import genders from '../constants/Genders';
 import RRule from "rrule/dist/esm/src/rrule";
 import moment from "moment";
+import {Frequency} from "rrule/dist/esm/src/types";
 
 export default class PetScreen extends React.Component {
     static navigationOptions = ({navigation}) => {
@@ -175,28 +176,8 @@ export default class PetScreen extends React.Component {
                             </Right>
                         </ListItem>
                         {tasks.map((task, idx) => {
-                            const rrule = RRule.parseString(task.recurrence);
                             const hour = moment(task.hour, "HH:mm:ss").format("HH:mm");
-
-                            let days = rrule.byweekday
-                                .sort((dayA, dayB) => {
-                                    return dayA.weekday - dayB.weekday;
-                                })
-                                .map((day, idx) => {
-                                    return day.toString();
-                                });
-
-                            if (days.length === 7) {
-                                days = 'codziennie';
-                            } else if (JSON.stringify(days) === JSON.stringify(['MO', 'TU', 'WE', 'TH', 'FR'])) {
-                                days = 'pn - pt';
-                            } else if (JSON.stringify(days) === JSON.stringify(['SA', 'SU'])) {
-                                days = 'weekendy';
-                            } else {
-                                days = days.map((day, idx) => {
-                                    return t('days.' + day + '.shortcut');
-                                }).join(', ');
-                            }
+                            let days = this._rruleToLabel(task.recurrence);
 
                             return <ListItem noIndent button icon last={idx === tasks.length - 1} key={idx}
                                              onPress={() => this._handleTaskListItemPress(task)}>
@@ -224,6 +205,32 @@ export default class PetScreen extends React.Component {
                 </ScrollView>
             </Container>
         );
+    }
+
+    _rruleToLabel(recurrence) {
+        const rrule = RRule.parseString(recurrence);
+
+        let days = (rrule.byweekday ?? [])
+            .sort((dayA, dayB) => {
+                return dayA.weekday - dayB.weekday;
+            })
+            .map((day, idx) => {
+                return day.toString();
+            });
+
+        if (days.length === 7 || (rrule.freq === Frequency.DAILY && days.length === 0)) {
+            days = t('screen.pet.recurrence_daily');
+        } else if (JSON.stringify(days) === JSON.stringify(['MO', 'TU', 'WE', 'TH', 'FR'])) {
+            days = t('screen.pet.recurrence_mo_fr');
+        } else if (JSON.stringify(days) === JSON.stringify(['SA', 'SU'])) {
+            days = t('screen.pet.recurrence_weekend');
+        } else {
+            days = days.map((day, idx) => {
+                return t('days.' + day + '.shortcut');
+            }).join(', ');
+        }
+
+        return days;
     }
 
     _handleSaveButtonPress = async () => {

@@ -29,7 +29,11 @@
       "new_task": "Nowe zadanie...",
       "remove_profile_button": "Usuń profil",
       "confirm_remove": "Czy na pewno chcesz usunąć profil zwierzaka?",
-      "saved": "Profil został zapisany"
+      "saved": "Profil został zapisany",
+      "recurrence_daily": "codziennie",
+      "recurrence_mo_fr": "pn - pt",
+      "recurrence_weekend": "weekendy"
+
     },
     "new_pet": {
       "header": "Nowy profil",
