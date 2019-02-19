@@ -65,4 +65,17 @@ export class TasksService {
             })
             .catch(error);
     }
+
+    async delete(taskId, success, error) {
+        error = error || api.errorHandler;
+
+        api
+            .call()
+            .url('/api/tasks/' + taskId)
+            .delete()
+            .res((data) => {
+                success(data);
+            })
+            .catch(error);
+    }
 }
