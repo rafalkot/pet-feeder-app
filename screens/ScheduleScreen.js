@@ -21,6 +21,14 @@ export default class ScheduleScreen extends React.Component {
     }
 
     componentDidMount() {
+        this.props.navigation.addListener('willFocus', () => {
+            this.fetchData();
+        });
+    }
+
+    fetchData() {
+        this.setState({isLoading: true});
+
         this.scheduledTasksService.getAll((tasks) => {
             let done = [];
 
